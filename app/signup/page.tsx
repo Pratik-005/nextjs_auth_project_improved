@@ -15,6 +15,28 @@ const SignupPage = () => {
         password: ''
     });
 
+    const [disabled, setDisabled] = useState(true);
+
+    useEffect(() => {
+        if (user.email.trim().length < 0 || user.password.trim().length < 0) {
+            setDisabled(true)
+        } else {
+            setDisabled(false);
+        }
+    }, [user]);
+
+    const signup = async () => {
+        try {
+            setDisabled(true);
+            const res = await axios.post('/api/users/signup', user);
+            toast.success(res.data.message);
+            router.push('/login');
+        } catch (error: any) {
+            toast.success(error.response.data.message);
+        } finally {
+            setDisabled(false);
+        }
+    }
 
     return (
         <div className='h-screen flex items-center justify-center' >
@@ -24,7 +46,7 @@ const SignupPage = () => {
             />
 
             <div className='flex flex-col gap-4 bg-blue-50 p-5 rounded-sm' >
-                <h2 className='text-center' >Login</h2>
+                <h2 className='text-center' >Signup</h2>
                 <input
                     placeholder='email'
                     value={user.email}
@@ -40,11 +62,12 @@ const SignupPage = () => {
                 />
 
                 <button
-                    onClick={() => }
+                    onClick={signup}
+                    disabled={disabled}
                     className='bg-black text-white px-2 py-1 cursor-pointer rounded-sm'
-                >Submit</button>
+                > {disabled ? 'Loading...' : 'Submit'}</button>
 
-                <p className='text-xs text-center' >already SignupPaged?
+                <p className='text-xs text-center' >Already have an account ?
                     <span className='text-blue-500 ml-2' >
                         <Link href={'/login'} >Login</Link></span> </p>
             </div>

@@ -1,11 +1,13 @@
 'use client'
+import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 
 const LoginPagePage = () => {
+
 
     const router = useRouter();
 
@@ -14,8 +16,28 @@ const LoginPagePage = () => {
         password: ''
     });
 
+    const [disabled, setDisabled] = useState(true);
+
+    useEffect(() => {
+        if (user.email.trim().length < 0 || user.password.trim().length < 0) {
+            setDisabled(true)
+        } else {
+            setDisabled(false);
+        }
+    }, [user]);
 
     const login = async () => {
+        try {
+            setDisabled(true);
+            const res = await axios.post('/api/users/login', user);
+            toast.success(res.data.message);
+            router.push('/profile');
+        } catch (error: any) {
+            toast.success(error.response.data.message);
+        }
+        finally {
+            setDisabled(false);
+        }
     }
 
     return (
@@ -41,14 +63,14 @@ const LoginPagePage = () => {
                 />
 
                 <button
-                    onClick={LoginPagePage}
+                    onClick={login}
                     className='bg-black text-white px-2 py-1 cursor-pointer rounded-sm'>
                     Submit
                 </button>
 
-                <p className='text-xs text-center' >new user?
+                <p className='text-xs text-center' >New user ?
                     <span className='text-blue-500 ml-2' >
-                        <Link href={'/signup'} >Register</Link></span> </p>
+                        <Link href={'/signup'} >Signup</Link></span> </p>
             </div>
         </div>
     )
