@@ -1,5 +1,6 @@
 import { connectToDB } from "@/db/db";
 import User from "@/models/user.model";
+import { mailer } from "@/utils/mailer";
 import bcrypt from "bcryptjs";
 import { connect } from "http2";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,15 +19,17 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'user already exists' }, { status: 400 });
         }
 
-        const salt = await bcrypt.genSalt(10);  
-        const hashedPassword = await bcrypt.hash(password, salt);      
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
             email: email,
             password: hashedPassword,
         });
 
-        await newUser.save();;
+        const savedUser = await newUser.save();
+
+        await mailer({ email, emailType: 'VERIFY', userId: savedUser._id });
 
         return NextResponse.json({ message: 'account created successfullly' }, { status: 201 });
 
